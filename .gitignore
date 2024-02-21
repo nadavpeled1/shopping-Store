@@ -1,3 +1,5 @@
 #Ignore unwanted files
+#Do not include *.pyc files or any IDE specific files in your repository.
 *.log
 *.tmp
+*.pyc
