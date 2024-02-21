@@ -1,0 +1,3 @@
+#Ignore unwanted files
+*.log
+*.tmp
