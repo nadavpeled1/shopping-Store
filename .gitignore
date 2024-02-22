@@ -3,3 +3,4 @@
 *.log
 *.tmp
 *.pyc
+.pytest_cache
