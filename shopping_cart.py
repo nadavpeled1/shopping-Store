@@ -19,10 +19,11 @@ class ShoppingCart:
             raise ItemAlreadyExistsError(item.name)
         else:
             self.items[item.name] = item
+    
     def remove_item(self, item_name: str):
         """
         Removes the item with the given name from the shopping cart
-        Aguments: the current instance of ShoppingCart and an instance of str.
+        Arguments: the current instance of ShoppingCart and an instance of str.
         Exceptions: if no item with the given name exists, raises ItemNotExistError.
         """
         if item_name not in self.items:
@@ -34,3 +35,30 @@ class ShoppingCart:
         """:return: the subtotal price of all the items currently in the shopping cart."""
         subtotal = sum(item.price for item in self.items.values())
         return subtotal
+    
+    def get_tags_list(self) -> list:
+        """
+        :return: a list of all the hashtags of the items currently in the shopping cart (with repetitions).
+        """
+        return [tag for item in self.items.values() for tag in item.hashtags]
+
+    def get_tags_ranks(self) -> dict:
+        """
+        :return: a dict of all the hashtags of the items currently in the shopping cart as keys,
+        and the number of times they appear in the shopping cart as values.
+        """
+        tags = self.get_tags_list()
+        tags_ranks = {tag: tags.count(tag) for tag in tags}
+        return tags_ranks
+    
+    def get_item_rank_in_cart(self, item: Item) -> int:
+        """
+        :args: the current instance of ShoppingCart and an item in the shoppingCart.
+        :return: the number of common hashtags between the given item and the items currently in the shopping cart.
+        """
+        if len(self.items) == 0:
+            return 0
+        tags_ranks = self.get_tags_ranks()
+        rank = sum(tags_ranks[tag] for tag in item.hashtags)
+        return rank
+    

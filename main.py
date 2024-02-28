@@ -9,7 +9,7 @@ POSSIBLE_ACTIONS = [
     'exit'
 ]
 
-ITEMS_FILE = 'items.yml'
+ITEMS_FILE = "items.yml"
 
 
 def read_input():
@@ -20,6 +20,12 @@ def read_input():
 
 def main():
     store = Store(ITEMS_FILE)
+    print('Welcome to our store!')
+    print('You can search for items by name or hashtag, add or remove items from your cart, and checkout.')
+    print('To search for an item by name, type: search_by_name <item_name>')   
+    print('To search for an item by hashtag, type: search_by_hashtag <hashtag>')
+    print('To add an item to your cart, type: add_item <item_name>')
+    print('To remove an item from your cart, type: remove_item <item_name>')
     action, params = read_input()
     while action != 'exit':
         if action not in POSSIBLE_ACTIONS:

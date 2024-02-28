@@ -1,5 +1,5 @@
 class ItemNotExistError(Exception):
-    """ when trying to remove an item that does not exist in the shopping cart """
+    """ when trying to operate on an item that does not exist in the shopping cart"""
     def __init__(self, item_name: str):
         self.item_name = item_name
         super().__init__(f'Item {item_name} does not exist in the shopping cart.')
