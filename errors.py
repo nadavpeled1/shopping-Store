@@ -14,4 +14,7 @@ class ItemAlreadyExistsError(Exception):
 
 
 class TooManyMatchesError(Exception):
-    pass
+    """when trying to add an item substring that matches multiple items (and no such item with the exact name exists)"""
+    def __init__(self, item_name: str):
+        self.item_name = item_name
+        super().__init__(f'Too many matches for the item name "{item_name}".')

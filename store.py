@@ -1,5 +1,6 @@
 import yaml
 
+from errors import ItemNotExistError, TooManyMatchesError
 from item import Item
 from shopping_cart import ShoppingCart
 
@@ -32,31 +33,78 @@ class Store:
         # for each item, check: contains the given item_name & not in shopping cart
         search_result = [item for item in self._items if item_name in item.name and item_name not in self._shopping_cart.items]
         
-        # Sorting using a tuple as the key. The first element is the rank, the second is the item's name.
-        # we multiply the rank by -1 to get the highest rank first, while the item's name is sorted by default(earlier alphabetically comes first).
+        # Sorting using a tuple as the key. The first element is the rank, the second is the item's name. we multiply
+        # the rank by -1 to get the highest rank first, while the item's name is sorted by default(earlier
+        # alphabetically comes first).
         search_result.sort(key=lambda item: ((-1)*self._shopping_cart.get_item_rank_in_cart(item), item.name))
 
-        return search_result # keys are the item's names, so it sorts by item names by default
+        return search_result
 
     def search_by_hashtag(self, hashtag: str) -> list:
         """
         :args: the current instance of Store and an instance of str.
-        :return: a sorted list of all the items matching the search criterion. The sort order is described below.
-        
-        The items in the returned list must have the given hashtag in their hashtag list.
-        For example, when searching for the hashtag "paper", items with hashtags such as "tissue paper" must not be returned."""
-        search_result = [item for item in self._shopping_cart.items if hashtag in item.hashtags]
-        return sorted(search_result, key=lambda item: item.name)
-    
+        :return: a sorted list of all the items that has the given exact hashtag, and not already in the shopping cart.
+
+        For example, when searching for the hashtag "paper", items with hashtags such as "tissue paper" must not be returned.
+        """
+        # for each item, check: contains the given hashtag & not in shopping cart
+        search_result = [item for item in self._items if hashtag in item.hashtags and item.name not in self._shopping_cart.items]
+        # Sorting using a tuple as the key. The first element is the rank, the second is the item's name. we multiply
+        # the rank by -1 to get the highest rank first, while the item's name is sorted by default(earlier
+        # alphabetically comes first).
+        search_result.sort(key=lambda item: ((-1)*self._shopping_cart.get_item_rank_in_cart(item), item.name))
+        return search_result
 
     def add_item(self, item_name: str):
-        # TODO: Complete
-        pass
+        """
+        Adds an item with the given name to the customer’s shopping cart.
+        Arguments: the current instance of Store and an instance of str.
+        Exceptions: no such item exists, raises ItemNotExistError.
+                    there are multiple items matching the given name, raises TooManyMatchesError.
+                    the given item is already in the shopping cart, raises ItemAlreadyExistsError.
+        To ease the search for the customers, not the whole item’s name must be given, but rather a distinct substring.
+        For example, when adding "soap" to the cart, if an item such as "body soap" exists, and no other item with the
+        substring "soap" in its name, "body soap" should be added to the list.
+        You may assume that no two items exist such that one's name is a substring of the other.
+        """
+        #FIXME
+        # we need to search for the item in all items, and not only items that are not in the shopping cart
+        # not sure about this case. maybe we do need to search only in items that are not in the shopping cart
+
+        search_result = [item for item in self._items if item_name in item.name]
+
+        # no matches found, raises ItemNotExistError
+        if len(search_result) == 0:
+            raise ItemNotExistError(item_name)
+
+        # if multiple matches found, and there is no item with the exact name, raises TooManyMatchesError
+        if len(search_result) > 1 and not any(item_name == item.name for item in search_result):
+            raise TooManyMatchesError(item_name)
+
+        # if item already exists in the shopping cart, add_item will raise ItemAlreadyExistsError
+        if item_name in self._shopping_cart.items:
+            raise ItemAlreadyExistsError(item_name)
+
+        item = self.search_by_name(item_name)[0]
+        self._shopping_cart.add_item(item)
+
+    def check_distinct_substring(self, item_name: str):
+        """
+        Checks if the given item_name is a distinct substring of an item's name.
+        :param item_name: the given item_name
+        :return: True if the item_name is a distinct substring of an item's name, False otherwise.
+        """
+        return len(self.search_by_name(item_name)) == 1
 
     def remove_item(self, item_name: str):
-        # TODO: Complete
+        """
+        Removes an item with the given name from the customer’s shopping cart.
+        Arguments: the current instance of Store and an instance of str.
+        Exceptions: if no such item exists, raises ItemNotExistError. If there are multiple items matching the given name, raises TooManyMatchesError.
+        In a similar fashion to add_item, here too, not the whole item’s name must be given for it to be removed.
+        """
         pass
 
     def checkout(self) -> int:
-        # TODO: Complete
-        pass
+        """:return: the total price of all the items in the costumer’s shopping cart."""
+        return self._shopping_cart.get_subtotal()
