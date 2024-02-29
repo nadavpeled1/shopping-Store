@@ -1,6 +1,6 @@
 import yaml
 
-from errors import ItemNotExistError, TooManyMatchesError
+from errors import ItemNotExistError, TooManyMatchesError, ItemAlreadyExistsError
 from item import Item
 from shopping_cart import ShoppingCart
 
@@ -31,7 +31,8 @@ class Store:
         For example, when searching for "soap", items such as "dish soap" and "body soap" should be returned.
         """
         # for each item, check: contains the given item_name & not in shopping cart
-        search_result = [item for item in self._items if item_name in item.name and item_name not in self._shopping_cart.items]
+        item_with_given_name = [item for item in self._items if item_name in item.name] # contains the given item_name
+        search_result = [item for item in item_with_given_name if item.name not in self._shopping_cart.items] # not in shopping cart
         
         # Sorting using a tuple as the key. The first element is the rank, the second is the item's name. we multiply
         # the rank by -1 to get the highest rank first, while the item's name is sorted by default(earlier
@@ -77,16 +78,21 @@ class Store:
         if len(search_result) == 0:
             raise ItemNotExistError(item_name)
 
-        # if multiple matches found, and there is no item with the exact name, raises TooManyMatchesError
-        if len(search_result) > 1 and not any(item_name == item.name for item in search_result):
+        if len(search_result) == 1: # only one match found
+            # add_item will raise item already exists error if the item is already in the shopping cart
+            self._shopping_cart.add_item(search_result[0])
+            return
+
+        # search_result contains multiple items:
+        # there is no item with the exact name, means no unique substring, raises TooManyMatchesError
+        if not any(item_name == item.name for item in search_result):
             raise TooManyMatchesError(item_name)
 
-        # if item already exists in the shopping cart, add_item will raise ItemAlreadyExistsError
-        if item_name in self._shopping_cart.items:
-            raise ItemAlreadyExistsError(item_name)
-
         item = self.search_by_name(item_name)[0]
-        self._shopping_cart.add_item(item)
+        self._shopping_cart.add_item(item) # add_item will raise item already exists error if the item is already in the shopping cart
+
+
+
 
     def check_distinct_substring(self, item_name: str):
         """

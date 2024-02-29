@@ -1,6 +1,7 @@
 from item import Item
 from errors import ItemNotExistError, ItemAlreadyExistsError
 
+
 class ShoppingCart:
 
     def __init__(self):
@@ -19,7 +20,7 @@ class ShoppingCart:
             raise ItemAlreadyExistsError(item.name)
         else:
             self.items[item.name] = item
-    
+
     def remove_item(self, item_name: str):
         """
         Removes the item with the given name from the shopping cart
@@ -35,7 +36,7 @@ class ShoppingCart:
         """:return: the subtotal price of all the items currently in the shopping cart."""
         subtotal = sum(item.price for item in self.items.values())
         return subtotal
-    
+
     def get_tags_list(self) -> list:
         """
         :return: a list of all the hashtags of the items currently in the shopping cart (with repetitions).
@@ -50,15 +51,15 @@ class ShoppingCart:
         tags = self.get_tags_list()
         tags_ranks = {tag: tags.count(tag) for tag in tags}
         return tags_ranks
-    
+
     def get_item_rank_in_cart(self, item: Item) -> int:
         """
-        :args: the current instance of ShoppingCart and an item in the shoppingCart.
+        :args: the current instance of ShoppingCart and an item to check its rank.
         :return: the number of common hashtags between the given item and the items currently in the shopping cart.
         """
-        if len(self.items) == 0:
+        if len(self.items) == 0: # empty cart
             return 0
-        tags_ranks = self.get_tags_ranks()
-        rank = sum(tags_ranks[tag] for tag in item.hashtags)
+
+        cart_tags_ranks = self.get_tags_ranks()
+        rank = sum(cart_tags_ranks[tag] for tag in item.hashtags if tag in cart_tags_ranks)
         return rank
-    
