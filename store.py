@@ -68,10 +68,8 @@ class Store:
         substring "soap" in its name, "body soap" should be added to the list.
         You may assume that no two items exist such that one's name is a substring of the other.
         """
-        #FIXME
-        # we need to search for the item in all items, and not only items that are not in the shopping cart
-        # not sure about this case. maybe we do need to search only in items that are not in the shopping cart
 
+        # search for the items with the given name or containing the given name
         search_result = [item for item in self._items if item_name in item.name]
 
         # no matches found, raises ItemNotExistError
@@ -106,10 +104,29 @@ class Store:
         """
         Removes an item with the given name from the customer’s shopping cart.
         Arguments: the current instance of Store and an instance of str.
-        Exceptions: if no such item exists, raises ItemNotExistError. If there are multiple items matching the given name, raises TooManyMatchesError.
+        Exceptions: if no such item exists, raises ItemNotExistError.
+                    If there are multiple items matching the given name, raises TooManyMatchesError.
         In a similar fashion to add_item, here too, not the whole item’s name must be given for it to be removed.
         """
-        pass
+        # search for the items with the given name or containing the given name
+        search_result = [item for item in self._items if item_name in item.name]
+
+        # no matches found, raises ItemNotExistError
+        if len(search_result) == 0:
+            raise ItemNotExistError(item_name)
+
+        if len(search_result) == 1:  # only one match found
+            # remove_item will raise item not exist error if the item is not in the shopping cart
+            self._shopping_cart.remove_item(search_result[0].name)
+            return
+
+        # search_result contains multiple items:
+        # there is no item with the exact name, means no unique substring, raises TooManyMatchesError
+        if not any(item_name == item.name for item in search_result):
+            raise TooManyMatchesError(item_name)
+
+        item = self.search_by_name(item_name)[0]
+        self._shopping_cart.remove_item(item.name) # remove_item will raise item not exist error if the item is not in the shopping cart
 
     def checkout(self) -> int:
         """:return: the total price of all the items in the costumer’s shopping cart."""
